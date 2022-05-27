@@ -181,6 +181,7 @@ function socketMain(io) {
         kind
       );
       const producer = getProducer(remoteId, kind, mode);
+      console.log(producer)
       if (!producer) {
         console.error(
           'producer NOT EXIST for remoteId=%s kind=%s',
