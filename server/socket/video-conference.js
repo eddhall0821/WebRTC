@@ -20,7 +20,13 @@ function socketMain(io) {
       );
       cleanUpPeer(socket);
     });
-
+    socket.on("sendFile", (data, callback) =>{
+      console.log(data)
+      socket.broadcast.emit('receiveFile', {
+        data
+      });
+      sendResponse(data, callback)
+    })
     socket.on("chatInput", (data, callback) => {
       socket.broadcast.emit('chatOutput', {
         data

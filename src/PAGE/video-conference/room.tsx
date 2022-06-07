@@ -931,6 +931,9 @@ function MeetRoom(props: any) {
       socket.on("chatOutput", function (data: any) {
         console.log(data)
       })
+      socket.on("receiveFile", function (data: any) {
+        console.log(data)
+      })
       socket.on('newProducer', function (message: any) {
         console.log('socket.io newProducer:', message);
         const remoteId = message.socketId;
@@ -1000,6 +1003,19 @@ function MeetRoom(props: any) {
     });
   };
 
+  const uploadFile = (e:any) =>{
+    var file = e.target.files[0];
+    console.log(file.size)
+    var reader = new FileReader();
+    reader.onload = async function(event:any) {
+      // The file's text will be printed here
+      console.log(event.target.result)
+      const data = await sendRequest("sendFile", { user: urlParams.user, data: event.target.result })
+      console.log(data)
+    };
+    reader.readAsText(file);        
+    }
+  
   return (
     <div>
       <div>
@@ -1064,6 +1080,7 @@ function MeetRoom(props: any) {
           Start Screen
         </button>
       )}
+      <input onChange={(e) => uploadFile(e)} type='file' name='file' id='file'/>
       <button onClick={async () => await chatInput()}>chat!</button>
       <div>
         local video

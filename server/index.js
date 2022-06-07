@@ -9,7 +9,7 @@ const http = require('http');
 const https = require('https');
 
 let serverOptions = {
-    hostName: '192.168.50.221',
+    hostName: 'localhost',
     listenPort: 5005,
     useHttps: true,
     httpsKeyFile: './cert/key.pem',
