@@ -65,6 +65,9 @@ function MeetRoom(props: any) {
   const [isConnected, setIsConnected] = React.useState(false);
   const [remoteVideos, setRemoteVideos]: any = React.useState({});
   const [isShareScreen, setIsShareScreen] = React.useState(false);
+  const [img, setImg] = React.useState("");
+  const [chat, setChat]:any[] = React.useState([]);
+  const [text, setText] = React.useState("");
 
   const urlParams: any = useParams()
   // ============ UI button ==========
@@ -94,8 +97,10 @@ function MeetRoom(props: any) {
       });
   };
   async function chatInput() {
-    const data = await sendRequest("chatInput", { user: urlParams.user, text: "data" })
-    console.log(data)
+    const data:any = await sendRequest("chatInput", { user: urlParams.user, text: text })
+    // setTheArray(oldArray => [...oldArray, newElement]);
+    setChat((prevState:any) =>[...prevState, data]);
+    console.log(chat)
   }
 
   async function handleConnectScreenShare() {
@@ -930,9 +935,16 @@ function MeetRoom(props: any) {
       });
       socket.on("chatOutput", function (data: any) {
         console.log(data)
+        setChat((prevState:any) =>[...prevState, data.data]);
       })
       socket.on("receiveFile", function (data: any) {
         console.log(data)
+        alert(`${data.data.user}가 파일을 전송했습니다.`)
+        console.log(data.data)
+        const blob = new Blob([data.data.data], {type: 'application/octet-stream'});
+        setImg(URL.createObjectURL(blob))  
+        console.log(blob)
+    
       })
       socket.on('newProducer', function (message: any) {
         console.log('socket.io newProducer:', message);
@@ -1008,17 +1020,19 @@ function MeetRoom(props: any) {
     console.log(file.size)
     var reader = new FileReader();
     reader.onload = async function(event:any) {
-      // The file's text will be printed here
       console.log(event.target.result)
-      const data = await sendRequest("sendFile", { user: urlParams.user, data: event.target.result })
-      console.log(data)
+      const data:any = await sendRequest("sendFile", { user: urlParams.user, data: event.target.result })
+      const blob = new Blob([event.target.result], {type: 'application/octet-stream'});
+      setImg(URL.createObjectURL(blob))  
+      console.log(blob)
     };
-    reader.readAsText(file);        
+    reader.readAsArrayBuffer(file);
     }
   
   return (
     <div>
       <div>
+        <a href={img}>filedownload</a>
         <input
           disabled={isStartMedia}
           onChange={handleUseVideo}
@@ -1081,6 +1095,7 @@ function MeetRoom(props: any) {
         </button>
       )}
       <input onChange={(e) => uploadFile(e)} type='file' name='file' id='file'/>
+      <input onChange={(e)=>setText(e.target.value)} value={text}></input>
       <button onClick={async () => await chatInput()}>chat!</button>
       <div>
         local video
@@ -1122,6 +1137,13 @@ function MeetRoom(props: any) {
           }
         );
       })}
+      <div style={{display:"flex", flexDirection: "column"}}>
+      {
+        chat.map((chat:any, index:any)=>
+          <span key={index}>{`${chat.user} : ${chat.text}`}</span>
+        )
+      }
+      </div>
     </div>
   );
 }
